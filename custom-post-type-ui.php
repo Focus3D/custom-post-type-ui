@@ -550,36 +550,11 @@ function disp_boolean( $booText ) {
  */
 function cptui_settings_tab_menu( $page = 'post_types' ) {
 
-	# initiate our arrays with default classes
-	$tab1 = $tab2 = $tab3 = $tab4 = array( 'nav-tab' );
-	$has = false;
+	$tabs = cptui_get_tabs( $page );
 
-	if ( 'importexport' == $page ) :
-		$title = __( 'Import/Export', 'custom-post-type-ui' );
-	elseif ( 'taxonomies' == $page ) :
-		$title = __( 'Manage Taxonomies', 'custom-post-type-ui' );
-		$taxes = get_option( 'cptui_taxonomies' );
-		$has = ( !empty( $taxes ) ) ? true : false;
-	else :
-		$title = __( 'Manage Post Types', 'custom-post-type-ui' );
-		$types = get_option( 'cptui_post_types' );
-		$has = ( !empty( $types ) ) ? true : false;
-	endif;
+	/*foreach ( $tabs as $tab ) {
 
-	if ( !empty( $_GET['action'] ) ) {
-		if ( 'edit' == $_GET['action'] || 'taxonomies' == $_GET['action'] ) {
-			$tab2[] = 'nav-tab-active';
-		} elseif ( 'get_code' == $_GET['action'] ) {
-			$tab3[] = 'nav-tab-active';
-		} elseif ( 'debuginfo' == $_GET['action'] ) {
-			$tab4[] = 'nav-tab-active';
-		}
-	}  else {
-		$tab1[] = 'nav-tab-active';
-	}
-
-	# implode our arrays for class attributes
-	$tab1 = implode( ' ', $tab1 ); $tab2 = implode( ' ', $tab2 ); $tab3 = implode( ' ', $tab3 ); $tab4 = implode( ' ', $tab4 );
+	}*/
 
 	?>
 	<h1><?php echo $title; ?></h1>
@@ -619,6 +594,122 @@ function cptui_settings_tab_menu( $page = 'post_types' ) {
 	?>
 	</h2>
 <?php
+}
+
+function cptui_get_tabs( $page = '' ) {
+	/*
+	 * if ( 'importexport' == $page ) :
+		$title = __( 'Import/Export', 'custom-post-type-ui' );
+	elseif ( 'taxonomies' == $page ) :
+		$title = __( 'Manage Taxonomies', 'custom-post-type-ui' );
+		$taxes = get_option( 'cptui_taxonomies' );
+		$has = ( !empty( $taxes ) ) ? true : false;
+	else :
+		$title = __( 'Manage Post Types', 'custom-post-type-ui' );
+		$types = get_option( 'cptui_post_types' );
+		$has = ( !empty( $types ) ) ? true : false;
+	endif;
+	 * # initiate our arrays with default classes
+	$tab1 = $tab2 = $tab3 = $tab4 = array( 'nav-tab' );
+	$has = false;
+	 */
+	// Need to set titles, extra classes, boolean value if to show or not(created post type(s) or tax(es)), url to use for tab
+	/*
+	 * if ( !empty( $_GET['action'] ) ) {
+		if ( 'edit' == $_GET['action'] || 'taxonomies' == $_GET['action'] ) {
+			$tab2[] = 'nav-tab-active';
+		} elseif ( 'get_code' == $_GET['action'] ) {
+			$tab3[] = 'nav-tab-active';
+		} elseif ( 'debuginfo' == $_GET['action'] ) {
+			$tab4[] = 'nav-tab-active';
+		}
+	}  else {
+		$tab1[] = 'nav-tab-active';
+	}
+	# implode our arrays for class attributes
+	$tab1 = implode( ' ', $tab1 ); $tab2 = implode( ' ', $tab2 ); $tab3 = implode( ' ', $tab3 ); $tab4 = implode( ' ', $tab4 );
+	 */
+	return (array) apply_filters( 'cptui_get_tabs', array(), $page );
+}
+
+function cptui_add_post_type_tab( $tabs = array(), $page = '' ) {
+	$types = get_option( 'cptui_post_types' );
+	$classes = cptui_get_default_tab_classes();
+	// $actions = ???
+	// NEED WAY TO SET POST TYPE ACTIVE STATUS. NO LONGER ABLE TO DEFAULT.
+	if ( ! empty( $types ) ) {
+		$tabs[] = array(
+			'title'   => __( 'Manage Post Types', 'custom-post-type-ui' ),
+			'url'     => admin_url( 'admin.php?page=cptui_manage_post_types' ),
+			'classes' => implode( ' ', $classes )
+			// 'classes' => cptui_get_extra_tab_classes( $classes, $actions )
+		);
+	}
+
+	return $tabs;
+}
+add_filter( 'cptui_get_tabs', 'cptui_add_post_type_tab', 10, 2 );
+
+function cptui_add_taxonomies_tab( $tabs = array(), $page = '' ) {
+	$taxes  = get_option( 'cptui_taxonomies' );
+	$classes = cptui_get_default_tab_classes();
+
+	$actions = array( 'edit', 'taxonomies' );
+
+	if ( ! empty( $taxes ) ) {
+		$tabs[] = array(
+			'title' => __( 'Manage Taxonomies', 'custom-post-type-ui' ),
+			'url'   => admin_url( 'admin.php?page=cptui_manage_taxonomies' ),
+			'classes' => cptui_get_extra_tab_classes( $classes, $actions )
+		);
+	}
+
+	return $tabs;
+}
+add_filter( 'cptui_get_tabs', 'cptui_add_taxonomies_tab', 10, 2 );
+
+function cptui_add_import_export_tab( $tabs = array(), $page = '' ) {}
+
+function cptui_add_get_code_tab( $tabs = array(), $page = '' ) {}
+
+function cptui_add_debug_info_tab( $tabs = array(), $page = '' ) {}
+
+/**
+ * Return default tab classes for a given tab.
+ *
+ * @since 1.3.0
+ *
+ * @return array Default tabs
+ */
+function cptui_get_default_tab_classes() {
+	return array( 'nav-tab' );
+}
+
+/**
+ * Add extra classes as appropriate or necessary to tabs.
+ *
+ * @since 1.3.0
+ *
+ * @param array $current_classes Array of classes already set to be added.
+ * @param array $check_actions   Page actions to check against.
+ *
+ * @return string
+ */
+function cptui_get_extra_tab_classes( $current_classes = array(), $check_actions = array() ) {
+	if ( in_array( cptui_get_current_action(), $check_actions ) ) {
+		$current_classes[] = 'nav-tab-active';
+	}
+	#$current_classes = apply_filters( 'cptui_');
+	return implode( ' ', $current_classes );
+}
+
+function cptui_get_current_action() {
+	$current_action = '';
+	if ( ! empty( $_GET ) && isset( $_GET['action'] ) ) {
+		$current_action .= esc_textarea( $_GET['action'] );
+	}
+
+	return $current_action;
 }
 
 /**
