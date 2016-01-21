@@ -1,5 +1,10 @@
 <?php
-/* This file controls everything about our support section. */
+/**
+ * Custom Post Type UI Support Questions.
+
+ * @package CPTUI
+ * @subpackage Support
+ */
 
 # Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;

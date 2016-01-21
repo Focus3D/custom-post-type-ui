@@ -1,6 +1,9 @@
 <?php
 /**
- * This file controls all of the content from the Taxonomies page.
+ * Custom Post Type UI Taxonomy Settings.
+
+ * @package CPTUI
+ * @subpackage Taxonomies
  */
 
 # Exit if accessed directly
